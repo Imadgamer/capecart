@@ -14,6 +14,7 @@ import SellerLayout from "./layouts/SellerLayout";
 import SellerDashboard from "./pages/seller/SellerDashboard";
 import CategorySelect from "./pages/seller/CategorySelect";
 import AddProduct from "./pages/seller/AddProduct";
+import EditProduct from "./pages/seller/EditProduct";
 import MyProducts from "./pages/seller/MyProducts";
 import SellerOrders from "./pages/seller/SellerOrders";
 import SellerChat from "./pages/seller/SellerChat";
@@ -29,6 +30,7 @@ import CustomerOrders from "./pages/customer/CustomerOrders";
 import CustomerCart from "./pages/customer/CustomerCart";
 import CustomerProfile from "./pages/customer/CustomerProfile";
 import CustomerPlaceholder from "./pages/customer/CustomerPlaceholder";
+import ProductDetail from "./pages/customer/ProductDetail";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +53,7 @@ const App = () => (
               <Route path="categories" element={<CategorySelect />} />
               <Route path="products" element={<MyProducts />} />
               <Route path="products/new" element={<AddProduct />} />
+              <Route path="products/edit/:id" element={<EditProduct />} />
               <Route path="orders" element={<SellerOrders />} />
               <Route path="chat" element={<SellerChat />} />
               <Route path="profile" element={<SellerProfile />} />
@@ -74,6 +77,7 @@ const App = () => (
               <Route index element={<CustomerDashboard />} />
               <Route path="search" element={<CustomerSearch />} />
               <Route path="categories" element={<CustomerCategories />} />
+              <Route path="product/:id" element={<ProductDetail />} />
               <Route path="cart" element={<CustomerCart />} />
               <Route path="orders" element={<CustomerOrders />} />
               <Route path="chat" element={<CustomerChat />} />

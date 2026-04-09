@@ -4,14 +4,13 @@ import {
   Star, Tag, Clock, CreditCard, Shield, Bookmark, Gift, LogOut
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   SidebarFooter, useSidebar
 } from "@/components/ui/sidebar";
-import { ShoppingBag } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const mainItems = [
   { title: "Home", url: "/customer", icon: LayoutDashboard },
@@ -43,25 +42,17 @@ const settingsItems = [
 export function CustomerSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const location = useLocation();
   const { signOut } = useAuth();
 
   const renderGroup = (label: string, items: typeof mainItems) => (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground/70">
-        {label}
-      </SidebarGroupLabel>
+      <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground/70">{label}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map(item => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild>
-                <NavLink
-                  to={item.url}
-                  end={item.url === "/customer"}
-                  className="hover:bg-sidebar-accent/50"
-                  activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                >
+                <NavLink to={item.url} end={item.url === "/customer"} className="hover:bg-sidebar-accent/50" activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium">
                   <item.icon className="mr-2 h-4 w-4" />
                   {!collapsed && <span>{item.title}</span>}
                 </NavLink>
@@ -76,9 +67,7 @@ export function CustomerSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <div className="p-4 flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-          <ShoppingBag className="w-4 h-4 text-primary-foreground" />
-        </div>
+        <img src={logo} alt="CapeCart" className="w-8 h-8 rounded-lg shrink-0" />
         {!collapsed && (
           <div>
             <p className="font-heading font-bold text-sm">CapeCart</p>
@@ -92,10 +81,7 @@ export function CustomerSidebar() {
         {renderGroup("Account", settingsItems)}
       </SidebarContent>
       <SidebarFooter className="p-4">
-        <button
-          onClick={() => signOut()}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive transition-colors w-full"
-        >
+        <button onClick={() => signOut()} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive transition-colors w-full">
           <LogOut className="w-4 h-4" />
           {!collapsed && <span>Sign Out</span>}
         </button>
