@@ -1,9 +1,33 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
 import { Store, ShoppingBag } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const RoleSelect = () => {
   const navigate = useNavigate();
+  const { user, role, loading } = useAuth();
+
+  // If already logged in, redirect to their dashboard
+  useEffect(() => {
+    if (!loading && user && role) {
+      if (user.email === "dumikanam@gmail.com") {
+        navigate("/admin", { replace: true });
+      } else if (role === "seller") {
+        navigate("/seller", { replace: true });
+      } else if (role === "customer") {
+        navigate("/customer", { replace: true });
+      }
+    }
+  }, [user, role, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
