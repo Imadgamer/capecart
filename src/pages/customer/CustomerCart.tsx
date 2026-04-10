@@ -43,12 +43,15 @@ const CustomerCart = () => {
     setItems(stored);
   }, []);
 
+  // Auto-fill address from profile
   useEffect(() => {
     if (profile) {
-      setPhone(profile.phone || "");
-      setStreet(profile.address_street || "");
-      setCity(profile.address_city || "");
-      setCountry(profile.address_country || "");
+      setPhone(prev => prev || profile.phone || "");
+      setStreet(prev => prev || profile.address_street || "");
+      setHouseNo(prev => prev || profile.address_house_no || "");
+      setCity(prev => prev || profile.address_city || "");
+      setCountry(prev => prev || profile.address_country || "");
+      setZip(prev => prev || profile.address_zip || "");
     }
   }, [profile]);
 
@@ -74,16 +77,16 @@ const CustomerCart = () => {
 
     setOrdering(true);
     try {
-      // Group items by seller
       const sellerGroups: Record<string, CartItem[]> = {};
       items.forEach(item => {
         if (!sellerGroups[item.seller_id]) sellerGroups[item.seller_id] = [];
         sellerGroups[item.seller_id].push(item);
       });
 
+      let lastConvId: string | null = null;
+
       for (const [sellerId, sellerItems] of Object.entries(sellerGroups)) {
         const orderTotal = sellerItems.reduce((s, i) => s + i.price * i.quantity, 0);
-
         const { data: order, error } = await createOrder({
           buyer_id: user.id,
           seller_id: sellerId,
@@ -103,26 +106,23 @@ const CustomerCart = () => {
           })),
         });
 
-        if (error || !order) {
-          toast.error("Failed to place order");
-          continue;
-        }
+        if (error || !order) { toast.error("Failed to place order"); continue; }
 
-        // Create conversation and send order summary
         const { data: conv } = await getOrCreateConversation(user.id, sellerId, order.id);
         if (conv) {
+          lastConvId = conv.id;
           const summary = `📦 New Order #${order.id.slice(0, 8)}\n\n` +
             sellerItems.map(i => `• ${i.name} x${i.quantity}${i.selected_size ? ` (${i.selected_size})` : ""}${i.selected_color ? ` [${i.selected_color}]` : ""} — $${(i.price * i.quantity).toFixed(2)}`).join("\n") +
             `\n\nTotal: $${orderTotal.toFixed(2)}\n📞 ${phone}\n📍 ${houseNo} ${street}, ${city}, ${country}` +
             `\n\nDelivery OTP: ${order.delivery_otp}`;
-
           await sendMessage(conv.id, user.id, summary, "order_summary");
         }
       }
 
       updateCart([]);
-      toast.success("Order placed! Check your messages for updates.");
-      navigate("/customer/orders");
+      toast.success("Order placed! Chat with the seller.");
+      // Redirect to chat instead of orders
+      navigate("/customer/chat");
     } finally {
       setOrdering(false);
     }
@@ -158,7 +158,6 @@ const CustomerCart = () => {
           </div>
           <div><Label className="text-sm font-semibold">ZIP/Postal Code</Label><Input value={zip} onChange={e => setZip(e.target.value)} placeholder="12345" className="mt-1 h-11 rounded-xl" /></div>
         </Card>
-
         <Card className="p-4 mt-4">
           <h3 className="text-sm font-semibold mb-2">Order Summary</h3>
           {items.map((item, idx) => (
@@ -168,11 +167,9 @@ const CustomerCart = () => {
             </div>
           ))}
           <div className="flex justify-between text-sm font-bold pt-2 mt-2 border-t border-border">
-            <span>Total</span>
-            <span className="text-primary">${total.toFixed(2)}</span>
+            <span>Total</span><span className="text-primary">${total.toFixed(2)}</span>
           </div>
         </Card>
-
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-card border-t border-border flex gap-3">
           <Button variant="outline" className="rounded-xl" onClick={() => setStep("cart")}>Back</Button>
           <Button className="flex-1 h-12 rounded-xl text-base font-semibold" onClick={handlePlaceOrder} disabled={ordering}>
@@ -187,7 +184,6 @@ const CustomerCart = () => {
     <div className="p-4 md:p-6 max-w-5xl mx-auto animate-fade-in pb-24">
       <h1 className="text-xl font-heading font-bold mb-1">Shopping Cart</h1>
       <p className="text-xs text-muted-foreground mb-6">{items.length} item{items.length > 1 ? "s" : ""} in cart</p>
-
       <div className="space-y-3">
         {items.map((item, idx) => (
           <Card key={idx} className="p-3 flex gap-3">
@@ -210,7 +206,6 @@ const CustomerCart = () => {
           </Card>
         ))}
       </div>
-
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-card border-t border-border">
         <div className="flex justify-between items-center mb-3">
           <span className="text-sm text-muted-foreground">Total ({items.length} items)</span>
